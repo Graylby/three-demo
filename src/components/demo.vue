@@ -3,6 +3,8 @@ import * as THREE from "three";
 import front from '../assets/front.png';
 import aside from '../assets/aside.png';
 import bottom from '../assets/bottom.png';
+// 引入dat.gui.js的一个类GUI
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 // 引入轨道控制器扩展库OrbitControls.js
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { onMounted, ref } from "vue";
@@ -12,6 +14,10 @@ const init = () => {
   // 设置场景
   const scene = new THREE.Scene();
   const geometry = new THREE.BoxGeometry(160, 350, 160);
+  // 设置gui
+  const gui = new GUI();
+  gui.domElement.style.right = '0px';
+  gui.domElement.style.width = '300px';
   // 设置纹理贴图
   // 创建纹理对象并加载纹理图像
   const textureFront = new THREE.TextureLoader().load(front);
@@ -20,7 +26,6 @@ const init = () => {
   const textureBottom = new THREE.TextureLoader().load(bottom);
   const textureLeft = new THREE.TextureLoader().load(aside);
   const textureRight = new THREE.TextureLoader().load(aside);
-
   // 创建材质并将纹理应用到每个面
   const materialFront = new THREE.MeshLambertMaterial({ map: textureFront });
   const materialBack = new THREE.MeshLambertMaterial({ map: textureBack });
@@ -48,20 +53,17 @@ const init = () => {
   // 设置xyz坐标轴
   const axesHelper = new THREE.AxesHelper(1500);
   scene.add(axesHelper);
-  // 平行光
-  // const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-  // // 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
-  // directionalLight.position.set(80, 100, 50);
-  // // 方向光指向对象网格模型mesh，可以不设置，默认的位置是0,0,0
-  // directionalLight.target = mesh;
-  // const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1);
-  // // 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
-  // directionalLight2.position.set(-80, -100, -50);
-  // // 方向光指向对象网格模型mesh，可以不设置，默认的位置是0,0,0
-  // directionalLight2.target = mesh;
-  // scene.add(directionalLight, directionalLight2);
+  // 点光源
+  const light = new THREE.PointLight( 0xffffff, 0.8 );
+  light.position.set( 0, 300, 200 );
+  gui.add(light.position, 'x', -500, 500)
+  gui.add(light.position, 'y', -500, 500)
+  gui.add(light.position, 'z', -500, 500)
+  const pointLightHelper = new THREE.PointLightHelper( light, 10 );
+  scene.add( pointLightHelper );
+  scene.add( light );
   //环境光:没有特定方向，整体改变场景的光照明暗
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambient);
   // 渲染
   const renderer = new THREE.WebGLRenderer({
